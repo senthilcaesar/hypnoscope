@@ -110,6 +110,7 @@ server <- function(input, output) {
       lstgcols("R"), lstgcols("W"), lstgcols("?")
     )
 
+    # Default plot CLOCK_TIME
     output$plot <- renderPlot({
       req(values$opt[["CLOCK_TIME"]])
       isolate({
@@ -118,6 +119,7 @@ server <- function(input, output) {
     })
   })
 
+  # Observer selectInput choices and accordingly update the plot
   observeEvent(
     input$ultradian,
     {
