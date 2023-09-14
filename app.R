@@ -31,16 +31,16 @@ ui <- fluidPage(
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
+  
   values <- reactiveValues(opt = list())
-
 
   observeEvent(input$upload, {
     d <- read.table(input$upload$datapath, header = T, stringsAsFactors = F)
     names(d)[4] <- "SS"
 
-    values$opt[["ni"]] <- length(unique(d$ID))
-    values$opt[["nf"]] <- length(d$ID[d$E == 1])
-    if (values$opt[["ni"]] != values$opt[["nf"]]) {
+    ni <- length(unique(d$ID))
+    nf <- length(d$ID[d$E == 1])
+    if (ni != nf) {
       cat("not all indivs have first epoch (E==1)...\n")
       d <- d[d$ID %in% d$ID[d$E == 1], ]
     }
@@ -81,14 +81,29 @@ server <- function(input, output) {
     # Align to T2 == 0
     d$E2 <- d$EA - d$T2
 
-    values$opt[["data"]] <- d
 
-    dmin <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, min)
-    dmax <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, max)
-    ids <- unique(values$opt[["data"]]$ID)
-    ne <- max(values$opt[["data"]]$EA) - min(values$opt[["data"]]$EA) + 1
-    m <- matrix(NA, nrow = ne, ncol = values$opt[["ni"]])
-    for (i in 1:values$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values$opt[["data"]]$SS[values$opt[["data"]]$ID == ids[i]])
+    #---------- Plot for clock time-----------------------
+    dmin <- tapply(d$EA, d$ID, min)
+    dmax <- tapply(d$EA, d$ID, max)
+    ids <- unique(d$ID)
+    ne <- max(d$EA) - min(d$EA) + 1
+    
+    m1 <- matrix(NA, nrow = ne, ncol = ni)
+    for (i in 1:ni) m1[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(d$SS[d$ID == ids[i]])
+    values$opt[["CLOCK_TIME"]] <- m1
+    #----------------------------------------------------
+
+    #---------- Plot for onset--------------------------
+    dmin <- tapply(d$E2, d$ID, min)
+    dmax <- tapply(d$E2, d$ID, max)
+    mindmin <- min(dmin)
+    dmin <- dmin - mindmin + 1
+    dmax <- dmax - mindmin + 1
+    ne <- max(d$E2) - min(d$E2) + 1
+    m2 <- matrix(NA, nrow = ne, ncol = ni)
+    for (i in 1:ni) m2[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(d$SS[d$ID == ids[i]])
+    values$opt[["ONSET"]] <- m2
+    #--------------------------------------------------
 
     stgpal <- c(
       lstgcols("N3"), lstgcols("N2"), lstgcols("N1"),
@@ -96,9 +111,9 @@ server <- function(input, output) {
     )
 
     output$plot <- renderPlot({
-      req(m)
+      req(values$opt[["CLOCK_TIME"]])
       isolate({
-        image(m, useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+        image(values$opt[["CLOCK_TIME"]], useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
       })
     })
   })
@@ -108,52 +123,25 @@ server <- function(input, output) {
     {
       req(input$upload)
       if (input$ultradian == "ONSET") {
-        # output$text <- renderText({paste("You have selected", input$ultradian)})
-
-        # Plot for onset
-        dmin <- tapply(values$opt[["data"]]$E2, values$opt[["data"]]$ID, min)
-        dmax <- tapply(values$opt[["data"]]$E2, values$opt[["data"]]$ID, max)
-        ids <- unique(values$opt[["data"]]$ID)
-
-        mindmin <- min(dmin)
-        dmin <- dmin - mindmin + 1
-        dmax <- dmax - mindmin + 1
-
-        ne <- max(values$opt[["data"]]$E2) - min(values$opt[["data"]]$E2) + 1
-        m <- matrix(NA, nrow = ne, ncol = values$opt[["ni"]])
-        for (i in 1:values$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values$opt[["data"]]$SS[values$opt[["data"]]$ID == ids[i]])
-
         stgpal <- c(
           lstgcols("N3"), lstgcols("N2"), lstgcols("N1"),
           lstgcols("R"), lstgcols("W"), lstgcols("?")
         )
-
         output$plot <- renderPlot({
-          req(m)
+          req(values$opt[["ONSET"]])
           isolate({
-            image(m, useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+            image(values$opt[["ONSET"]], useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
           })
         })
       } else if (input$ultradian == "CLOCK_TIME") {
-        # output$text <- renderText({paste("You have selected", input$ultradian)})
-
-        # Plot for clock-alignment
-        dmin <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, min)
-        dmax <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, max)
-        ids <- unique(values$opt[["data"]]$ID)
-        ne <- max(values$opt[["data"]]$EA) - min(values$opt[["data"]]$EA) + 1
-        m <- matrix(NA, nrow = ne, ncol = values$opt[["ni"]])
-        for (i in 1:values$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values$opt[["data"]]$SS[values$opt[["data"]]$ID == ids[i]])
-
         stgpal <- c(
           lstgcols("N3"), lstgcols("N2"), lstgcols("N1"),
           lstgcols("R"), lstgcols("W"), lstgcols("?")
         )
-
         output$plot <- renderPlot({
-          req(m)
+          req(values$opt[["CLOCK_TIME"]])
           isolate({
-            image(m, useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+            image(values$opt[["CLOCK_TIME"]], useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
           })
         })
       }
