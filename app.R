@@ -1,6 +1,5 @@
 library(shiny)
 library(luna)
-library(dplyr)
 library(lubridate)
 library(shinybusy)
 
@@ -27,7 +26,7 @@ ui <- fluidPage(
     column(
       10,
       plotOutput("plot")
-      # textOutput("text")
+      #textOutput("text")
     )
   )
 )
