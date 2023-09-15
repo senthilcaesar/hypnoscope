@@ -1,10 +1,13 @@
 library(shiny)
 library(luna)
+library(dplyr)
 library(lubridate)
+library(shinybusy)
 
 options(shiny.maxRequestSize = 2000 * 1024^2)
 
 ui <- fluidPage(
+  add_busy_spinner(spin = "fading-circle"),
   titlePanel("Hypnoscope"), # Add a title panel
   tags$hr(),
   fluidRow(
@@ -19,19 +22,18 @@ ui <- fluidPage(
           ".hypnos"
         )
       ),
-      selectInput(inputId = "ultradian", label = "Select Ultradian dynamics", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F),
+      selectInput(inputId = "ultradian", label = "Select Ultradian dynamics", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F)
     ),
     column(
       10,
-      plotOutput("plot", click = "plot_click"),
-      textOutput("text")
+      plotOutput("plot")
+      # textOutput("text")
     )
   )
 )
 
 # Define server logic required to draw a histogram
-server <- function(input, output) {
-  
+server <- function(input, output, session) {
   values <- reactiveValues(opt = list())
 
   observeEvent(input$upload, {
@@ -87,7 +89,7 @@ server <- function(input, output) {
     dmax <- tapply(d$EA, d$ID, max)
     ids <- unique(d$ID)
     ne <- max(d$EA) - min(d$EA) + 1
-    
+
     m1 <- matrix(NA, nrow = ne, ncol = ni)
     for (i in 1:ni) m1[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(d$SS[d$ID == ids[i]])
     values$opt[["CLOCK_TIME"]] <- m1
