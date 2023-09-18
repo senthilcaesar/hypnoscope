@@ -112,10 +112,7 @@ server <- function(input, output, session) {
     req(input$upload)
     image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
   })
-  
-  
 }
-
 
 # Run the application
 shinyApp(ui = ui, server = server)
