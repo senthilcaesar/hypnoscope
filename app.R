@@ -105,12 +105,15 @@ server <- function(input, output, session) {
     values$opt[["ONSET"]] <- m2
     #---------------------------------------------------------------------------
     values$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
+  }) # End of observeEvent
 
-    # Default plot CLOCK_TIME
-    output$plot <- renderPlot({
-      image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
-    })
+  # Default plot CLOCK_TIME
+  output$plot <- renderPlot({
+    req(input$upload)
+    image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
   })
+  
+  
 }
 
 
