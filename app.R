@@ -26,13 +26,14 @@ ui <- fluidPage(
     column(
       10,
       plotOutput("plot")
-      #textOutput("text")
     )
   )
 )
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
+  # Values, an object that is created outside a reactive expression is updated depending
+  # on inputs but is not re-executed whenever an input changes.
   values <- reactiveValues(opt = list())
 
   observeEvent(input$upload, {
@@ -69,7 +70,6 @@ server <- function(input, output, session) {
     d <- merge(d, d1[, c("ID", "E1")], by = "ID")
     d$EA <- d$E + d$E1
 
-
     # Get key anchors for each individual: sleep onset / offset, lights, sleep midpoint
     d$SLEEP <- as.integer(d$SS %in% c("N1", "N2", "N3", "R"))
     d1 <- as.data.frame(tapply(d$EA[d$SLEEP == 1], d$ID[d$SLEEP == 1], min))
@@ -82,8 +82,7 @@ server <- function(input, output, session) {
     # Align to T2 == 0
     d$E2 <- d$EA - d$T2
 
-
-    #---------- Plot for clock time-----------------------
+    #---------- Plot for clock time---------------------------------------------
     dmin <- tapply(d$EA, d$ID, min)
     dmax <- tapply(d$EA, d$ID, max)
     ids <- unique(d$ID)
@@ -92,9 +91,9 @@ server <- function(input, output, session) {
     m1 <- matrix(NA, nrow = ne, ncol = ni)
     for (i in 1:ni) m1[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(d$SS[d$ID == ids[i]])
     values$opt[["CLOCK_TIME"]] <- m1
-    #----------------------------------------------------
+    #---------------------------------------------------------------------------
 
-    #---------- Plot for onset--------------------------
+    #---------- Plot for onset--------------------------------------------------
     dmin <- tapply(d$E2, d$ID, min)
     dmax <- tapply(d$E2, d$ID, max)
     mindmin <- min(dmin)
@@ -104,19 +103,12 @@ server <- function(input, output, session) {
     m2 <- matrix(NA, nrow = ne, ncol = ni)
     for (i in 1:ni) m2[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(d$SS[d$ID == ids[i]])
     values$opt[["ONSET"]] <- m2
-    #--------------------------------------------------
-
-    stgpal <- c(
-      lstgcols("N3"), lstgcols("N2"), lstgcols("N1"),
-      lstgcols("R"), lstgcols("W"), lstgcols("?")
-    )
+    #---------------------------------------------------------------------------
+    values$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
 
     # Default plot CLOCK_TIME
     output$plot <- renderPlot({
-      req(values$opt[["CLOCK_TIME"]])
-      isolate({
-        image(values$opt[["CLOCK_TIME"]], useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
-      })
+      image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
     })
   })
 
@@ -125,32 +117,13 @@ server <- function(input, output, session) {
     input$ultradian,
     {
       req(input$upload)
-      if (input$ultradian == "ONSET") {
-        stgpal <- c(
-          lstgcols("N3"), lstgcols("N2"), lstgcols("N1"),
-          lstgcols("R"), lstgcols("W"), lstgcols("?")
-        )
-        output$plot <- renderPlot({
-          req(values$opt[["ONSET"]])
-          isolate({
-            image(values$opt[["ONSET"]], useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
-          })
-        })
-      } else if (input$ultradian == "CLOCK_TIME") {
-        stgpal <- c(
-          lstgcols("N3"), lstgcols("N2"), lstgcols("N1"),
-          lstgcols("R"), lstgcols("W"), lstgcols("?")
-        )
-        output$plot <- renderPlot({
-          req(values$opt[["CLOCK_TIME"]])
-          isolate({
-            image(values$opt[["CLOCK_TIME"]], useRaster = T, col = stgpal, xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
-          })
-        })
-      }
+      output$plot <- renderPlot({
+        image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+      })
     }
   )
 }
+
 
 # Run the application
 shinyApp(ui = ui, server = server)
