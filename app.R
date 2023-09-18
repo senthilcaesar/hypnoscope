@@ -111,17 +111,6 @@ server <- function(input, output, session) {
       image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
     })
   })
-
-  # Observer selectInput choices and accordingly update the plot
-  observeEvent(
-    input$ultradian,
-    {
-      req(input$upload)
-      output$plot <- renderPlot({
-        image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
-      })
-    }
-  )
 }
 
 
