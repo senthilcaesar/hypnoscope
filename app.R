@@ -82,35 +82,46 @@ server <- function(input, output, session) {
     # Align to T2 == 0
     d$E2 <- d$EA - d$T2
 
-    #---------- Plot for clock time---------------------------------------------
-    dmin <- tapply(d$EA, d$ID, min)
-    dmax <- tapply(d$EA, d$ID, max)
-    ids <- unique(d$ID)
-    ne <- max(d$EA) - min(d$EA) + 1
+    values$opt[["data"]] <- d
+    values$opt[["ni"]] <- ni
+    values$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
+  }) # End of observeEvent (input$upload)
 
-    m1 <- matrix(NA, nrow = ne, ncol = ni)
-    for (i in 1:ni) m1[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(d$SS[d$ID == ids[i]])
-    values$opt[["CLOCK_TIME"]] <- m1
-    #---------------------------------------------------------------------------
-
-    #---------- Plot for onset--------------------------------------------------
-    dmin <- tapply(d$E2, d$ID, min)
-    dmax <- tapply(d$E2, d$ID, max)
+  # Reaction expression for ONSET computation
+  # Results are cached the first time the expression is called
+  onset <- reactive({
+    dmin <- tapply(values$opt[["data"]]$E2, values$opt[["data"]]$ID, min)
+    dmax <- tapply(values$opt[["data"]]$E2, values$opt[["data"]]$ID, max)
+    ids <- unique(values$opt[["data"]]$ID)
     mindmin <- min(dmin)
     dmin <- dmin - mindmin + 1
     dmax <- dmax - mindmin + 1
-    ne <- max(d$E2) - min(d$E2) + 1
-    m2 <- matrix(NA, nrow = ne, ncol = ni)
-    for (i in 1:ni) m2[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(d$SS[d$ID == ids[i]])
-    values$opt[["ONSET"]] <- m2
-    #---------------------------------------------------------------------------
-    values$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
-  }) # End of observeEvent
+    ne <- max(values$opt[["data"]]$E2) - min(values$opt[["data"]]$E2) + 1
+    m <- matrix(NA, nrow = ne, ncol = values$opt[["ni"]])
+    for (i in 1:values$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values$opt[["data"]]$SS[values$opt[["data"]]$ID == ids[i]])
+    m
+  })
+
+  # Reaction expression for CLOCK_TIME computation
+  # Results are cached the first time the expression is called
+  clockTime <- reactive({
+    dmin <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, min)
+    dmax <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, max)
+    ids <- unique(values$opt[["data"]]$ID)
+    ne <- max(values$opt[["data"]]$EA) - min(values$opt[["data"]]$EA) + 1
+    m <- matrix(NA, nrow = ne, ncol = values$opt[["ni"]])
+    for (i in 1:values$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values$opt[["data"]]$SS[values$opt[["data"]]$ID == ids[i]])
+    m
+  })
 
   # Default plot CLOCK_TIME
   output$plot <- renderPlot({
     req(input$upload)
-    image(values$opt[[input$ultradian]], useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+    data <- switch(input$ultradian,
+      CLOCK_TIME = clockTime(),
+      ONSET = onset()
+    )
+    image(data, useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
   })
 }
 
