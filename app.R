@@ -87,6 +87,7 @@ server <- function(input, output, session) {
     values$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
   }) # End of observeEvent (input$upload)
 
+  # Create reactive expressions with reactive({ })
   # Reaction expression for ONSET computation
   # Results are cached the first time the expression is called
   onset <- reactive({
@@ -117,8 +118,11 @@ server <- function(input, output, session) {
   # Default plot CLOCK_TIME
   output$plot <- renderPlot({
     req(input$upload)
+    
+    # Shiny will automatically re-build the data object if an input value in
+    # the renderPlot function changes
     data <- switch(input$ultradian,
-      CLOCK_TIME = clockTime(),
+      CLOCK_TIME = clockTime(), # Call reactive expression
       ONSET = onset()
     )
     image(data, useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
