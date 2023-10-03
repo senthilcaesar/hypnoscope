@@ -22,7 +22,9 @@ ui <- navbarPage(
         ),
         textOutput("text.header1a"),
         hr(style = "border-color: #d9d9d9"),
-        actionButton("load.default", "Example")
+        actionButton("load.default", "Example"),
+        hr(style = "border-color: #d9d9d9"),
+        import_copypaste_ui(id = "myid", title = NULL, name_field = F)
       ),
       column( # Main
         10,
@@ -33,24 +35,11 @@ ui <- navbarPage(
         ),
         div(style = "margin-top: 10px"),
         tabsetPanel(
-          id = "maintabs",
-          tabPanel(
-            "Headers",
-            fluidRow(
-              column(4, DT::dataTableOutput("table.header3")),
-              column(8, DT::dataTableOutput("table.header2"))
-            )
-          ),
-          tabPanel(
-            "Hypnogram",
-            tabsetPanel(
-              tabPanel("Summaries", DT::dataTableOutput("table.hypno", width = "100%")),
-              tabPanel("Times", DT::dataTableOutput("table.hypno.times", width = "100%")),
-              tabPanel("Stages", DT::dataTableOutput("table.hypno.stages")),
-              tabPanel("Cycles", DT::dataTableOutput("table.hypno.cycles")),
-              tabPanel("Epochs", DT::dataTableOutput("table.hypno.epochs")),
-            )
-          )
+          tabPanel("Summaries", DT::dataTableOutput("table.hypno", width = "100%")),
+          tabPanel("Times", DT::dataTableOutput("table.hypno.times", width = "100%")),
+          tabPanel("Stages", DT::dataTableOutput("table.hypno.stages")),
+          tabPanel("Cycles", DT::dataTableOutput("table.hypno.cycles")),
+          tabPanel("Epochs", DT::dataTableOutput("table.hypno.epochs")),
         ),
       )
     )
