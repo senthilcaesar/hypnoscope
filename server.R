@@ -32,7 +32,10 @@ server <- function(input, output, session) {
 
   # --------- Copy and Paste module----------------
 
-  imported <- import_copypaste_server("myid", btn_show_data = FALSE)
+  imported <- import_copypaste_server("myid",
+    btn_show_data = FALSE,
+    fread_args = list(col.names = "Annots", header = F, blank.lines.skip = T)
+  )
 
   toListen <- reactive({
     list(imported$status(), imported$data())
@@ -40,9 +43,9 @@ server <- function(input, output, session) {
 
   observeEvent(toListen(), {
     if (!is.null(imported$status()) && !is.null(imported$data())) {
+      reset(id = "upload1")
       txtPath <- tempfile(fileext = ".eannot")
-      annot <- isolate(imported$data())
-      for (stage in annot) cat(stage, "\n", file = txtPath, sep = "\n", append = TRUE)
+      for (stage in imported$data()) cat(stage, "\n", file = txtPath, sep = "\n", append = TRUE)
 
       edf.name <- "shhs1-204679.edf"
       edf.path <- "data/shhs1-204679.edf"
@@ -58,6 +61,8 @@ server <- function(input, output, session) {
       )
     }
   })
+
+
 
   #--------------------------------------------
 
