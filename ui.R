@@ -15,8 +15,9 @@ ui <- navbarPage(
           label = NULL,
           multiple = TRUE,
           accept = c(
-            ".csv",
+            ".annot",
             ".eannot",
+            ".xml",
             ".hypnos"
           )
         ),

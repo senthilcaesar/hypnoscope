@@ -10,21 +10,19 @@ server <- function(input, output, session) {
   observeEvent(input$upload1, {
     # Set to null
     values$file.details <- NULL
-    edf.name <- edf.path <- NULL
     annot.names <- annot.paths <- NULL
 
-    idx <- grep(".eannot", ignore.case = T, input$upload1$name)
+    idx <- c(
+      grep("\\<eannot\\>", ignore.case = T, input$upload1$name),
+      grep("\\<annot\\>", ignore.case = T, input$upload1$name),
+      grep("\\<xml\\>", ignore.case = T, input$upload1$name)
+    )
+
     annot.names <- input$upload1$name[idx]
     annot.paths <- input$upload1$datapath[idx]
 
-    # Take a single EDF
-    edf.name <- "shhs1-204679.edf"
-    edf.path <- "data/shhs1-204679.edf"
-
     # Input file details
     values$file.details <- list(
-      edf.name = edf.name,
-      edf.path = edf.path,
       annot.names = annot.names,
       annot.paths = annot.paths
     )
@@ -33,7 +31,7 @@ server <- function(input, output, session) {
   # --------- Copy and Paste module----------------
 
   imported <- import_copypaste_server("myid",
-    btn_show_data = FALSE,
+    btn_show_data = FALSE, reset = reactive(input$upload1),
     fread_args = list(col.names = "Annots", header = F, blank.lines.skip = T)
   )
 
@@ -47,25 +45,19 @@ server <- function(input, output, session) {
       txtPath <- tempfile(fileext = ".eannot")
       for (stage in imported$data()) cat(stage, "\n", file = txtPath, sep = "\n", append = TRUE)
 
-      edf.name <- "shhs1-204679.edf"
-      edf.path <- "data/shhs1-204679.edf"
       annot.names <- basename(txtPath)
       annot.paths <- txtPath
+      lset("epoch-check", "100000000")
 
       # Input file details
       values$file.details <- list(
-        edf.name = edf.name,
-        edf.path = edf.path,
         annot.names = annot.names,
         annot.paths = annot.paths
       )
     }
   })
 
-
-
   #--------------------------------------------
-
 
   # initiate view w/ an example data set
   observeEvent(input$load.default, {
@@ -73,8 +65,6 @@ server <- function(input, output, session) {
 
     values$file.details <-
       list(
-        edf.name = "learn-nsrr02.edf",
-        edf.path = "data/learn-nsrr02.edf",
         annot.names = "learn-nsrr02.xml",
         annot.paths = "data/learn-nsrr02.xml"
       )
@@ -84,8 +74,6 @@ server <- function(input, output, session) {
 
   load.data <- observeEvent(values$file.details, {
     # pull file names
-    edf.name <- values$file.details[["edf.name"]]
-    edf.path <- values$file.details[["edf.path"]]
     annot.names <- values$file.details[["annot.names"]]
     annot.paths <- values$file.details[["annot.paths"]]
 
@@ -100,14 +88,8 @@ server <- function(input, output, session) {
     updateTabsetPanel(inputId = "tabset", selected = "N = 1")
 
     # register that we have new data attached
-    values$hasedf <- !is.null(edf.name)
     values$hasannots <- !is.null(annot.names)
-    values$hasdata <- values$hasedf | values$hasannots
 
-    if (values$hasedf) {
-      values$opt[["edfname"]] <- edf.name
-      values$opt[["edfpath"]] <- edf.path
-    }
 
     if (values$hasannots) {
       values$opt[["annotnames"]] <- annot.names
@@ -115,28 +97,27 @@ server <- function(input, output, session) {
     }
 
     # some brief console output
-    cat(" has data?", values$hasdata, "\n")
-    cat(" has edf?", values$hasedf, "\n")
     cat(" has annotations?", values$hasannots, "\n")
 
-    if (values$hasedf) {
-      # attach EDF
-      cat("attaching", values$opt[["edfpath"]], "\n")
-      ledf(values$opt[["edfpath"]])
+    lempty.edf()
 
-      # read all EDF+ annotations as class-level
-      # so that they show in the display
-      lset("edf-annot-class-all", "T")
+    # read all EDF+ annotations as class-level
+    # so that they show in the display
+    lset("edf-annot-class-all", "T")
 
-      # add any annotations
-      for (a in values$opt[["annotpaths"]]) {
-        cat("attaching", a, "\n")
-        ladd.annot.file(a)
-      }
-
-      # kick off initial analyses
-      init()
+    # Add any annotations
+    eannot_file <- endsWith(values$opt[["annotpaths"]], ".eannot")
+    if (eannot_file) {
+      lset("epoch-check", "100000000")
     }
+
+    for (a in values$opt[["annotpaths"]]) {
+      cat("attaching", a, "\n")
+      ladd.annot.file(a)
+    }
+
+    # kick off initial analyses
+    init()
   })
 
   init <- function() {
@@ -150,6 +131,7 @@ server <- function(input, output, session) {
     values$opt[["init.secs"]] <- max(ret$EPOCH$E$STOP)
     values$opt[["init.segidx"]] <- ret$SEGMENTS$SEG[, c("START", "STOP")]
     session$resetBrush("hypno_brush")
+
     # Get stage-aligned epochs and hypnogram
     ret <- leval(paste("EPOCH align verbose dur=", values$elen, sep = ""))
     values$opt[["ne.aligned"]] <- dim(ret$EPOCH$E)[1]
@@ -180,7 +162,7 @@ server <- function(input, output, session) {
     cat(" has-staging?", values$hasstaging, "\n")
 
     output$hypno1 <- renderPlot({
-      req(values$hasedf, values$hasstaging)
+      req(values$hasstaging)
       par(mar = c(0, 0, 0, 0))
       lhypno(values$opt[["hypno.epochs"]]$STAGE,
         cycles = values$opt[["hypno.epochs"]]$CYCLE,
@@ -195,7 +177,6 @@ server <- function(input, output, session) {
 
     # Base-level EDF headers output
     output$table.header3 <- DT::renderDataTable({
-      req(values$hasedf)
       df <- values$opt[["header1"]]
       df$ID <- df$EDF_ID <- NULL
       df <- df[, c("EDF_TYPE", "NS", "START_DATE", "START_TIME", "STOP_TIME", "REC_DUR_HMS", "REC_DUR_SEC", "EPOCH", "TOT_DUR_HMS", "TOT_DUR_SEC", "NR", "REC_DUR")]
@@ -224,7 +205,6 @@ server <- function(input, output, session) {
 
     # Channel-wise EDF headers output
     output$table.header2 <- DT::renderDataTable({
-      req(values$hasedf)
       DT::datatable(values$opt[["header2"]],
         extensions = c("Buttons"),
         options = list(
@@ -243,7 +223,7 @@ server <- function(input, output, session) {
   # -------------------Hypnogram statistics------------------------------------#
 
   output$table.hypno <- DT::renderDataTable({
-    req(values$hasedf, values$hasstaging, values$variable.staging)
+    req(values$hasstaging, values$variable.staging)
 
     m <- as.data.frame(matrix(
       c(
@@ -307,7 +287,7 @@ server <- function(input, output, session) {
   })
 
   output$table.hypno.times <- DT::renderDataTable({
-    req(values$hasedf, values$hasstaging, values$variable.staging)
+    req(values$hasstaging, values$variable.staging)
 
     m <- as.data.frame(matrix(
       c(
@@ -345,7 +325,7 @@ server <- function(input, output, session) {
   #
 
   output$table.hypno.stages <- DT::renderDataTable({
-    req(values$hasedf, values$hasstaging, values$variable.staging)
+    req(values$hasstaging, values$variable.staging)
 
     dt <- values$opt[["hypno.stages"]]
     dt <- dt[dt$SS %in% c("?", "N1", "N2", "N3", "R", "S", "W", "WASO"), ]
@@ -370,7 +350,7 @@ server <- function(input, output, session) {
   #
 
   output$table.hypno.cycles <- DT::renderDataTable({
-    req(values$hasedf, values$hasstaging, values$variable.staging)
+    req(values$hasstaging, values$variable.staging)
     dt <- values$opt[["hypno.cycles"]]
     dt$NUM <- 1:(dim(dt)[1])
     dt <- dt[, c("NUM", "NREMC_START", "NREMC_N", "NREMC_MINS", "NREMC_NREM_MINS", "NREMC_REM_MINS")]
@@ -391,7 +371,7 @@ server <- function(input, output, session) {
   # Hypnogram epoch-statistics
 
   output$table.hypno.epochs <- DT::renderDataTable({
-    req(values$hasedf, values$hasstaging, values$variable.staging)
+    req(values$hasstaging, values$variable.staging)
 
     dt <- values$opt[["hypno.epochs"]]
     dt <- dt[, c("E", "CLOCK_TIME", "MINS", "STAGE", "CYCLE", "PERSISTENT_SLEEP", "WASO", "E_N1", "E_N2", "E_N3", "E_REM", "E_SLEEP", "E_WASO")]
