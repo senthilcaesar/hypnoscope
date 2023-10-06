@@ -5,6 +5,7 @@ server <- function(input, output, session) {
   # Values, an object that is created outside a reactive expression is updated depending
   # on inputs but is not re-executed whenever an input changes.
   values <- reactiveValues(opt = list())
+  values2 <- reactiveValues(opt = list())
 
   #-------------------------------- Component 1 -------------------------------#
   observeEvent(input$upload1, {
@@ -105,6 +106,7 @@ server <- function(input, output, session) {
     # so that they show in the display
     lset("edf-annot-class-all", "T")
 
+
     # Add any annotations
     eannot_file <- endsWith(values$opt[["annotpaths"]], ".eannot")
     if (eannot_file) {
@@ -116,11 +118,17 @@ server <- function(input, output, session) {
       ladd.annot.file(a)
     }
 
+    # Restructure EDF to match the length of annotations
+    ret <- leval("ANNOTS")
+    end_sec <- sum(subset(ret$ANNOTS$ANNOT, ANNOT %in% c("N1", "N2", "N3", "W", "R", "L"))$DUR)
+    cmd <- paste("MASK sec=0-", end_sec, " & RE", sep = "")
+    leval(cmd)
+
     # kick off initial analyses
     init()
   })
 
-  init <- function() {
+  init <- function(end_sec) {
     values$elen <- 30
     ne <- lepoch()
     if (ne == 0) values$elen <- 1
@@ -303,7 +311,6 @@ server <- function(input, output, session) {
     ))
     m$HMS <- as.character(values$opt[["hypno.stats"]][, gsub("X", "HMS", m[, 1])])
     m$E <- round(as.numeric(values$opt[["hypno.stats"]][, gsub("X", "E", m[, 1])]), 3)
-    #    m$T <- round(as.numeric(values$opt[["hypno.stats"]][, gsub("X", "T", m[, 1])]), 3)
     m$EPOCH <- floor(m$E * 2) + 1
 
     DT::datatable(m,
@@ -394,7 +401,7 @@ server <- function(input, output, session) {
   #-------------------------------- End of component1--------------------------#
 
 
-  #-------------------------------- Component1---------------------------------#
+  #-------------------------------- Component2---------------------------------#
   observeEvent(input$upload2, {
     d <- read.table(input$upload2$datapath, header = T, stringsAsFactors = F)
     names(d)[4] <- "SS"
@@ -441,36 +448,36 @@ server <- function(input, output, session) {
     # Align to T2 == 0
     d$E2 <- d$EA - d$T2
 
-    values$opt[["data"]] <- d
-    values$opt[["ni"]] <- ni
-    values$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
-  }) # End of observeEvent (input$upload)
+    values2$opt[["data"]] <- d
+    values2$opt[["ni"]] <- ni
+    values2$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
+  }) # End of observe Event (input$upload)
 
   # Create reactive expressions with reactive({ })
   # Reaction expression for ONSET computation
   # Results are cached the first time the expression is called
   onset <- reactive({
-    dmin <- tapply(values$opt[["data"]]$E2, values$opt[["data"]]$ID, min)
-    dmax <- tapply(values$opt[["data"]]$E2, values$opt[["data"]]$ID, max)
-    ids <- unique(values$opt[["data"]]$ID)
+    dmin <- tapply(values2$opt[["data"]]$E2, values2$opt[["data"]]$ID, min)
+    dmax <- tapply(values2$opt[["data"]]$E2, values2$opt[["data"]]$ID, max)
+    ids <- unique(values2$opt[["data"]]$ID)
     mindmin <- min(dmin)
     dmin <- dmin - mindmin + 1
     dmax <- dmax - mindmin + 1
-    ne <- max(values$opt[["data"]]$E2) - min(values$opt[["data"]]$E2) + 1
-    m <- matrix(NA, nrow = ne, ncol = values$opt[["ni"]])
-    for (i in 1:values$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values$opt[["data"]]$SS[values$opt[["data"]]$ID == ids[i]])
+    ne <- max(values2$opt[["data"]]$E2) - min(values2$opt[["data"]]$E2) + 1
+    m <- matrix(NA, nrow = ne, ncol = values2$opt[["ni"]])
+    for (i in 1:values2$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values2$opt[["data"]]$SS[values2$opt[["data"]]$ID == ids[i]])
     m
   })
 
   # Reaction expression for CLOCK_TIME computation
   # Results are cached the first time the expression is called
   clockTime <- reactive({
-    dmin <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, min)
-    dmax <- tapply(values$opt[["data"]]$EA, values$opt[["data"]]$ID, max)
-    ids <- unique(values$opt[["data"]]$ID)
-    ne <- max(values$opt[["data"]]$EA) - min(values$opt[["data"]]$EA) + 1
-    m <- matrix(NA, nrow = ne, ncol = values$opt[["ni"]])
-    for (i in 1:values$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values$opt[["data"]]$SS[values$opt[["data"]]$ID == ids[i]])
+    dmin <- tapply(values2$opt[["data"]]$EA, values2$opt[["data"]]$ID, min)
+    dmax <- tapply(values2$opt[["data"]]$EA, values2$opt[["data"]]$ID, max)
+    ids <- unique(values2$opt[["data"]]$ID)
+    ne <- max(values2$opt[["data"]]$EA) - min(values2$opt[["data"]]$EA) + 1
+    m <- matrix(NA, nrow = ne, ncol = values2$opt[["ni"]])
+    for (i in 1:values2$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values2$opt[["data"]]$SS[values2$opt[["data"]]$ID == ids[i]])
     m
   })
 
@@ -486,6 +493,6 @@ server <- function(input, output, session) {
       CLOCK_TIME = clockTime(), # Call reactive expression
       ONSET = onset()
     )
-    image(data, useRaster = T, col = values$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+    image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
   })
 }

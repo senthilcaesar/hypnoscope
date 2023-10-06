@@ -4,6 +4,7 @@ library(shinybusy)
 library(shinyWidgets)
 library(shinyjs)
 library(datamods)
+library(lubridate)
 
 options(shiny.maxRequestSize = 2000 * 1024^2)
 source('/Users/sq566/hypnoscope/ui.R', local = TRUE)
