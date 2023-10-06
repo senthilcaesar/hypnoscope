@@ -171,7 +171,7 @@ server <- function(input, output, session) {
 
     output$hypno1 <- renderPlot({
       req(values$hasstaging)
-      par(mar = c(0, 0, 0, 0))
+      par(mar = c(1, 2, 0, 0))
       lhypno(values$opt[["hypno.epochs"]]$STAGE,
         cycles = values$opt[["hypno.epochs"]]$CYCLE,
         times = values$opt[["init.epochs.aligned"]]$START

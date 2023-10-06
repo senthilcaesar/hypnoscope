@@ -30,7 +30,7 @@ ui <- navbarPage(
       column( # Main
         10,
         plotOutput("hypno1",
-          width = "100%", height = "40px",
+          width = "100%", height = "120px",
           dblclick = "hypno_dblclick",
           brush = brushOpts(id = "hypno_brush", direction = "x", resetOnNew = F)
         ),
