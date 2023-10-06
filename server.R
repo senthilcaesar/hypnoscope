@@ -128,7 +128,7 @@ server <- function(input, output, session) {
     init()
   })
 
-  init <- function(end_sec) {
+  init <- function() {
     values$elen <- 30
     ne <- lepoch()
     if (ne == 0) values$elen <- 1
