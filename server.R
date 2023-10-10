@@ -1,4 +1,5 @@
 # server.R
+source("helpers.R")
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
@@ -171,8 +172,8 @@ server <- function(input, output, session) {
 
     output$hypno1 <- renderPlot({
       req(values$hasstaging)
-      par(mar = c(1, 2, 0, 0))
-      lhypno(values$opt[["hypno.epochs"]]$STAGE,
+      par(mar = c(5, 2.5, 0, 0))
+      lhypno2(values$opt[["hypno.epochs"]],
         cycles = values$opt[["hypno.epochs"]]$CYCLE,
         times = values$opt[["init.epochs.aligned"]]$START
       )

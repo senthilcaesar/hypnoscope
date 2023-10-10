@@ -30,15 +30,21 @@ ui <- navbarPage(
       column( # Main
         10,
         plotOutput("hypno1",
-          width = "100%", height = "120px",
+          width = "100%", height = "200px",
           dblclick = "hypno_dblclick",
           brush = brushOpts(id = "hypno_brush", direction = "x", resetOnNew = F)
         ),
-        div(style = "margin-top: 10px"),
+        div(style = "margin-top: 50px"),
         tabsetPanel(
-          tabPanel("Summaries", DT::dataTableOutput("table.hypno", width = "100%")),
-          tabPanel("Times", DT::dataTableOutput("table.hypno.times", width = "100%")),
-          tabPanel("Stages", DT::dataTableOutput("table.hypno.stages")),
+          id = "maintabs",
+          tabPanel(
+            "Summaries",
+            fluidRow(
+              column(7, DT::dataTableOutput("table.hypno")),
+              column(5, DT::dataTableOutput("table.hypno.stages"))
+            )
+          ),
+          tabPanel("Times", DT::dataTableOutput("table.hypno.times")),
           tabPanel("Cycles", DT::dataTableOutput("table.hypno.cycles")),
           tabPanel("Epochs", DT::dataTableOutput("table.hypno.epochs")),
         ),
