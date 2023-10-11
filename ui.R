@@ -69,7 +69,8 @@ ui <- navbarPage(
             ".hypnos"
           )
         ),
-        selectInput(inputId = "ultradian2", label = "Select Ultradian dynamics", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F)
+        selectInput(inputId = "ultradian2", label = "Select Ultradian dynamics", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F),
+        selectInput("sort", label = h5("Sort by"), choices = c("Time of Sleep Onset"), multiple = T, selectize = T),
       ),
       column(
         10,

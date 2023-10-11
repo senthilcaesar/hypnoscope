@@ -33,8 +33,7 @@ server <- function(input, output, session) {
   # --------- Copy and Paste module----------------
 
   imported <- import_copypaste_server("myid",
-    btn_show_data = FALSE, reset = reactive(input$upload1),
-    fread_args = list(col.names = "Annots", header = F, blank.lines.skip = T)
+    btn_show_data = FALSE, fread_args = list(col.names = "Annots", header = F, blank.lines.skip = T)
   )
 
   toListen <- reactive({
@@ -449,6 +448,7 @@ server <- function(input, output, session) {
     # Align to T2 == 0
     d$E2 <- d$EA - d$T2
 
+    values2$opt[["tmp_data"]] <- d1
     values2$opt[["data"]] <- d
     values2$opt[["ni"]] <- ni
     values2$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
@@ -482,18 +482,24 @@ server <- function(input, output, session) {
     m
   })
 
-  # Default plot CLOCK_TIME
-  # The Hypnoscope visualization app has one reactive object, a plot named "hypno"
-  # The plot is built with the image function
-  output$hypno2 <- renderPlot({
+  # Observe Inputs and plot
+  observeEvent(c(input$upload2, input$ultradian2, input$sort), {
     req(input$upload2)
 
-    # Shiny will automatically re-build the data object if an input value in the renderPlot function changes
-    # data is a reactive object the depends on user widget input ("ultradian")
     data <- switch(input$ultradian2,
       CLOCK_TIME = clockTime(), # Call reactive expression
       ONSET = onset()
     )
-    image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+
+    if (!isTruthy(input$sort)) {
+      data <- data
+    } else if (input$sort == "Time of Sleep Onset" & input$ultradian2 == "CLOCK_TIME") {
+      sort_by <- order(values2$opt[["tmp_data"]]$T2, decreasing = TRUE)
+      data <- data[, sort_by] # Column sorted by time of sleep onset
+    }
+
+    output$hypno2 <- renderPlot({
+      image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+    })
   })
 }
