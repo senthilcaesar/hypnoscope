@@ -483,7 +483,28 @@ server <- function(input, output, session) {
   })
 
   # Observe Inputs and plot
-  observeEvent(c(input$upload2, input$ultradian2, input$sort), {
+  observeEvent(c(input$upload2, input$ultradian2), {
+    req(input$upload2)
+
+    data <- switch(input$ultradian2,
+      CLOCK_TIME = clockTime(), # Call reactive expression
+      ONSET = onset()
+    )
+
+    names_vector1 <- ("Time of Sleep Onset")
+    names_vector2 <- ("NULL")
+    if (input$ultradian2 == "CLOCK_TIME") {
+      updateSelectizeInput(session, inputId = "sort", choices = c("Choose" = "", names_vector1))
+    } else if (input$ultradian2 == "ONSET") {
+      updateSelectizeInput(session, inputId = "sort", choices = c("Choose" = "", names_vector2))
+    }
+
+    output$hypno2 <- renderPlot({
+      image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+    })
+  })
+
+  observeEvent(c(input$sort), {
     req(input$upload2)
 
     data <- switch(input$ultradian2,
