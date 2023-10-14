@@ -504,6 +504,22 @@ server <- function(input, output, session) {
     })
   })
 
+  # server - Print number of observations plotted
+  output$n <- renderUI({
+    req(input$upload2)
+
+    data <- switch(input$ultradian2,
+      CLOCK_TIME = clockTime(), # Call reactive expression
+      ONSET = onset()
+    )
+    HTML(paste0(
+      "Number of observations <br>",
+      nrow(data),
+      " <b>", input$ultradian2, "</b>"
+    ))
+  })
+
+
   observeEvent(c(input$sort), {
     req(input$upload2)
 
