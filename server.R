@@ -499,9 +499,33 @@ server <- function(input, output, session) {
       updateSelectizeInput(session, inputId = "sort", choices = c("Choose" = "", names_vector2))
     }
 
-    output$hypno2 <- renderPlot({
-      image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
-    })
+    output$myImage <- renderImage(
+      {
+        # A temp file to save the output.
+        # This file will be removed later by render Image
+        outfile <- tempfile(fileext = ".png")
+
+        # Generate the PNG
+        png(outfile,
+          width = 200 * 6,
+          height = 200 * 4,
+          res = 72 * 10
+        )
+        par(mar = c(1, 2, 0.5, 0))
+        image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+        dev.off()
+
+        # Return a list containing the file name
+        list(
+          src = outfile,
+          contentType = "image/png",
+          width = 200 * 6,
+          height = 200 * 4,
+          alt = "This is alternate text"
+        )
+      },
+      deleteFile = TRUE
+    )
   })
 
   # server - Print number of observations plotted
@@ -535,8 +559,31 @@ server <- function(input, output, session) {
       data <- data[, sort_by] # Column sorted by time of sleep onset
     }
 
-    output$hypno2 <- renderPlot({
-      image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
-    })
+    # Update plot
+    output$myImage <- renderImage(
+      {
+        outfile <- tempfile(fileext = ".png")
+
+        # Generate the PNG
+        png(outfile,
+          width = 200 * 6,
+          height = 200 * 4,
+          res = 72 * 10
+        )
+        par(mar = c(1, 2, 0.5, 0))
+        image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+        dev.off()
+
+        # Return a list containing the file name
+        list(
+          src = outfile,
+          contentType = "image/png",
+          width = 200 * 6,
+          height = 200 * 4,
+          alt = "This is alternate text"
+        )
+      },
+      deleteFile = TRUE
+    )
   })
 }

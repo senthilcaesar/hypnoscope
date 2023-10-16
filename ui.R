@@ -75,7 +75,11 @@ ui <- navbarPage(
       ),
       column(
         10,
-        plotOutput("hypno2")
+        tags$head(tags$style(
+          type = "text/css",
+          "#myImage img {max-width: 100%; width: 1200; height: auto}"
+        )),
+        imageOutput("myImage")
       )
     )
   )
