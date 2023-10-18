@@ -120,7 +120,7 @@ server <- function(input, output, session) {
 
     # Restructure EDF to match the length of annotations
     ret <- leval("ANNOTS")
-    end_sec <- sum(subset(ret$ANNOTS$ANNOT, ANNOT %in% c("N1", "N2", "N3", "W", "R", "L"))$DUR)
+    end_sec <- sum(subset(ret$ANNOTS$ANNOT, ANNOT %in% c("N1", "N2", "N3", "W", "R", "L", "?"))$DUR)
     cmd <- paste("MASK sec=0-", end_sec, " & RE", sep = "")
     leval(cmd)
 
