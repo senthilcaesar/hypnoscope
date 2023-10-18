@@ -431,6 +431,7 @@ server <- function(input, output, session) {
 
     # Get epoch-wise starts for all people
     d1$E1 <- (secs - min(secs)) / 30
+    values2$opt[["start_recording"]] <- d1$E1
 
     # Adjust epoch counts : EA = aligned epochs (by clock)
     d <- merge(d, d1[, c("ID", "E1")], by = "ID")
@@ -491,8 +492,8 @@ server <- function(input, output, session) {
       ONSET = onset()
     )
 
-    names_vector1 <- ("Time of Sleep Onset")
-    names_vector2 <- ("NULL")
+    names_vector1 <- c("Time of Sleep Onset", "Start of recording")
+    names_vector2 <- c("NULL")
     if (input$ultradian2 == "CLOCK_TIME") {
       updateSelectizeInput(session, inputId = "sort", choices = c("Choose" = "", names_vector1))
     } else if (input$ultradian2 == "ONSET") {
@@ -557,6 +558,11 @@ server <- function(input, output, session) {
     } else if (input$sort == "Time of Sleep Onset" & input$ultradian2 == "CLOCK_TIME") {
       sort_by <- order(values2$opt[["tmp_data"]]$T2, decreasing = TRUE)
       data <- data[, sort_by] # Column sorted by time of sleep onset
+    } else if (input$sort == "Start of recording" & input$ultradian2 == "CLOCK_TIME") {
+      sort_by <- order(values2$opt[["start_recording"]], decreasing = TRUE)
+      data <- data[, sort_by] # Column sorted by start of recording
+    } else {
+      data <- data
     }
 
     # Update plot
