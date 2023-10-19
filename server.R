@@ -1,5 +1,14 @@
 # server.R
-source("helpers.R")
+library(shiny)
+library(luna)
+library(shinybusy)
+library(shinyWidgets)
+library(shinyjs)
+library(datamods)
+library(lubridate)
+library(shinydashboard)
+source("./helpers.R")
+options(shiny.maxRequestSize = 2000 * 1024^2)
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {

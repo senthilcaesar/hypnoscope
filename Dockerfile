@@ -65,7 +65,7 @@ RUN git clone https://github.com/remnrem/luna-base.git \
 ## LunaR
 RUN cp LightGBM/lib_lightgbm.so /usr/local/lib/ \
  && cp LightGBM/lib_lightgbm.so /usr/lib/ \
- && git clone https://github.com/remnrem/luna.git \
+ && git clone https://github.com/senthilcaesar/luna.git \
  && echo 'PKG_LIBS=include/libluna.a -L${LGBM_PATH} -lfftw3 -l_lightgbm' >> luna/src/Makevars \
  && LGBM=1 LGBM_PATH=/Programme/LightGBM/ R CMD INSTALL luna
 
@@ -94,7 +94,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir /data
 RUN mkdir /root/hypnoscope
-COPY ui.R server.R /root/hypnoscope/
+COPY ui.R server.R helpers.R /root/hypnoscope/
 COPY data /root/hypnoscope/data
 
 ENV _R_SHLIB_STRIP_=true
