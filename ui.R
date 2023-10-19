@@ -17,6 +17,7 @@ ui <- navbarPage(
   tabPanel(
     title = "N = 1",
     fluidRow(
+      add_busy_spinner(spin = "fading-circle"),
       column( # Sidebar
         2,
         # style = "background-color:#f2f0eb; border-top: 100px; height: 800px; width: 250px;",
