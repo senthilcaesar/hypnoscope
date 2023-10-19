@@ -3,6 +3,7 @@ ui <- navbarPage(
   id = "tabset",
   title = "Hypnoscope",
 
+
   # Component 1
   tabPanel(
     title = "N = 1",
@@ -54,9 +55,12 @@ ui <- navbarPage(
 
 
   # Component 2
+
+
   tabPanel(
     title = "N > 1",
     fluidRow(
+      add_busy_spinner(spin = "fading-circle"),
       column(
         2,
         # Input: Select a file ----
@@ -69,6 +73,10 @@ ui <- navbarPage(
             ".hypnos"
           )
         ),
+        textOutput("text.header2a"),
+        hr(style = "border-color: #d9d9d9"),
+        actionButton("load.default2", "Example"),
+        hr(style = "border-color: #d9d9d9"),
         selectInput(inputId = "ultradian2", label = "Select Ultradian dynamics", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F),
         selectInput("sort", label = h5("Sort by"), choices = c("Choose" = "", c("NULL")), multiple = F, selectize = T),
         uiOutput(outputId = "n")
@@ -79,7 +87,10 @@ ui <- navbarPage(
           type = "text/css",
           "#myImage img {max-width: 100%; width: 1200; height: auto}"
         )),
-        imageOutput("myImage")
+        box(
+          style = "width:1200px;overflow-x: scroll;height:800px;overflow-y: scroll;",
+          imageOutput("myImage")
+        )
       )
     )
   )

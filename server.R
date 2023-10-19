@@ -72,8 +72,8 @@ server <- function(input, output, session) {
     # Reset Shiny UI components
   })
 
-
-  load.data <- observeEvent(values$file.details, {
+  # Load data
+  observeEvent(values$file.details, {
     # pull file names
     annot.names <- values$file.details[["annot.names"]]
     annot.paths <- values$file.details[["annot.paths"]]
@@ -402,8 +402,36 @@ server <- function(input, output, session) {
 
 
   #-------------------------------- Component2---------------------------------#
+
+  observeEvent(input$load.default2, {
+    reset(id = "upload2")
+
+    values2$file.details <-
+      list(
+        hypnos.names = "cfs.hypnos",
+        hypnos.file = "data/cfs.hypnos"
+      )
+    # Reset Shiny UI components
+  })
+
   observeEvent(input$upload2, {
-    d <- read.table(input$upload2$datapath, header = T, stringsAsFactors = F)
+    values2$file.details <-
+      list(
+        hypnos.names = input$upload2$name,
+        hypnos.file = input$upload2$datapath
+      )
+  })
+
+  # Load data
+  observeEvent(values2$file.details, {
+    values2$opt[["hypnonames"]] <- values2$file.details[["hypnos.names"]]
+
+    # Set Image properties
+    values2$opt["width"] <- 200 * 5
+    values2$opt["height"] <- 200 * 8
+    values2$opt["res"] <- 1400
+
+    d <- read.table(values2$file.details[["hypnos.file"]], header = T, stringsAsFactors = F)
     names(d)[4] <- "SS"
 
     ni <- length(unique(d$ID))
@@ -483,9 +511,16 @@ server <- function(input, output, session) {
     m
   })
 
+  output$text.header2a <- renderText({
+    req(values2$file.details)
+    values2$opt[["hypnonames"]]
+  })
+
+
+
   # Observe Inputs and plot
-  observeEvent(c(input$upload2, input$ultradian2), {
-    req(input$upload2)
+  observeEvent(c(values2$file.details, input$ultradian2), {
+    req(values2$file.details)
 
     data <- switch(input$ultradian2,
       CLOCK_TIME = clockTime(), # Call reactive expression
@@ -508,11 +543,11 @@ server <- function(input, output, session) {
 
         # Generate the PNG
         png(outfile,
-          width = 200 * 6,
-          height = 200 * 4,
-          res = 72 * 10
+          width = as.numeric(values2$opt["width"]),
+          height = as.numeric(values2$opt["height"]),
+          res = as.numeric(values2$opt["res"])
         )
-        par(mar = c(1, 2, 0.5, 0))
+        par(mar = c(1, 0.5, 0.2, 0))
         image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
         dev.off()
 
@@ -520,8 +555,8 @@ server <- function(input, output, session) {
         list(
           src = outfile,
           contentType = "image/png",
-          width = 200 * 6,
-          height = 200 * 4,
+          width = as.numeric(values2$opt["width"]),
+          height = as.numeric(values2$opt["height"]),
           alt = "This is alternate text"
         )
       },
@@ -531,7 +566,7 @@ server <- function(input, output, session) {
 
   # server - Print number of observations plotted
   output$n <- renderUI({
-    req(input$upload2)
+    req(values2$file.details)
 
     data <- switch(input$ultradian2,
       CLOCK_TIME = clockTime(), # Call reactive expression
@@ -546,7 +581,7 @@ server <- function(input, output, session) {
 
 
   observeEvent(c(input$sort), {
-    req(input$upload2)
+    req(values2$file.details)
 
     data <- switch(input$ultradian2,
       CLOCK_TIME = clockTime(), # Call reactive expression
@@ -572,11 +607,11 @@ server <- function(input, output, session) {
 
         # Generate the PNG
         png(outfile,
-          width = 200 * 6,
-          height = 200 * 4,
-          res = 72 * 10
+          width = as.numeric(values2$opt["width"]),
+          height = as.numeric(values2$opt["height"]),
+          res = as.numeric(values2$opt["res"])
         )
-        par(mar = c(1, 2, 0.5, 0))
+        par(mar = c(1, 0.5, 0.2, 0))
         image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
         dev.off()
 
@@ -584,8 +619,8 @@ server <- function(input, output, session) {
         list(
           src = outfile,
           contentType = "image/png",
-          width = 200 * 6,
-          height = 200 * 4,
+          width = as.numeric(values2$opt["width"]),
+          height = as.numeric(values2$opt["height"]),
           alt = "This is alternate text"
         )
       },
