@@ -42,19 +42,12 @@ ui <- navbarPage(
         10,
         plotOutput("hypno1",
           width = "100%", height = "200px",
-          dblclick = "hypno_dblclick",
-          brush = brushOpts(id = "hypno_brush", direction = "x", resetOnNew = F)
         ),
         div(style = "margin-top: 50px"),
         tabsetPanel(
           id = "maintabs",
-          tabPanel(
-            "Summaries",
-            fluidRow(
-              column(7, DT::dataTableOutput("table.hypno")),
-              column(5, DT::dataTableOutput("table.hypno.stages"))
-            )
-          ),
+          tabPanel("Summaries", DT::dataTableOutput("table.hypno", width = "100%")),
+          tabPanel("Stages", DT::dataTableOutput("table.hypno.stages")),
           tabPanel("Times", DT::dataTableOutput("table.hypno.times")),
           tabPanel("Cycles", DT::dataTableOutput("table.hypno.cycles")),
           tabPanel("Epochs", DT::dataTableOutput("table.hypno.epochs")),
@@ -87,7 +80,7 @@ ui <- navbarPage(
         hr(style = "border-color: #d9d9d9"),
         actionButton("load.default2", "Example"),
         hr(style = "border-color: #d9d9d9"),
-        selectInput(inputId = "ultradian2", label = "Select Ultradian dynamics", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F),
+        selectInput(inputId = "ultradian2", label = "Align by", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F),
         selectInput("sort", label = h5("Sort by"), choices = c("Choose" = "", c("NULL")), multiple = F, selectize = T),
         uiOutput(outputId = "n")
       ),
