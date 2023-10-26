@@ -108,8 +108,16 @@ server <- function(input, output, session) {
 
     # some brief console output
     cat(" has annotations?", values$hasannots, "\n")
-
-    lempty.edf()
+    
+    # If in .annot format, Get start time from file
+    file_ext <- endsWith(annot.paths, '.annot')
+    if (isTRUE(file_ext)) {
+      startTime <- extract_hms(annot.paths)
+      lempty.edf(start=startTime)
+    }
+    else {
+      lempty.edf()
+    }
 
     # read all EDF+ annotations as class-level
     # so that they show in the display
