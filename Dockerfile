@@ -54,20 +54,20 @@ RUN install2.r --error --skipinstalled \
 COPY Rprofile.site /usr/local/lib/R/etc/
 
 # Luna
-RUN git clone https://github.com/remnrem/luna-base.git \
+RUN cp LightGBM/lib_lightgbm.so /usr/local/lib/ \
+ && cp LightGBM/lib_lightgbm.so /usr/lib/ \
+ && git clone https://github.com/remnrem/luna-base.git \
  && cd luna-base \ 
- && make -j 2 LGBM=1 LGBM_PATH=/Programme/LightGBM/ \
+ && make -j 2 LGBM=1 LGBM_PATH=/Programme/LightGBM \
  && ln -s /Programme/luna-base/luna /usr/local/bin/luna \
  && ln -s /Programme/luna-base/destrat /usr/local/bin/destrat \
  && ln -s /Programme/luna-base/behead /usr/local/bin/behead \
  && ln -s /Programme/luna-base/fixrows /usr/local/bin/fixrows
 
 ## LunaR
-RUN cp LightGBM/lib_lightgbm.so /usr/local/lib/ \
- && cp LightGBM/lib_lightgbm.so /usr/lib/ \
- && git clone https://github.com/senthilcaesar/luna.git \
+RUN git clone https://github.com/remnrem/luna.git \
  && echo 'PKG_LIBS=include/libluna.a -L${LGBM_PATH} -lfftw3 -l_lightgbm' >> luna/src/Makevars \
- && LGBM=1 LGBM_PATH=/Programme/LightGBM/ R CMD INSTALL luna
+ && LGBM=1 LGBM_PATH=/Programme/LightGBM/ EXTRA_PKG_LIBS="-L/Programme/LightGBM/lib -l_lightgbm" R CMD INSTALL luna
 
 #------------------------------- Multi-stage build (keeps the image size down)-------------------------------------------
 FROM rocker/r-ver:4.2.1
