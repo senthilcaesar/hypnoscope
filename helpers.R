@@ -46,29 +46,30 @@ lhypno2 <- function(hypno, cycles = NULL, times = seq(0, by = 30, length.out = l
 
 
 extract_hms <- function(fileName) {
+  sleep_stage <- c("W", "N1", "N2", "N3", "R", "L")
   n <- 3
   hms_regex <- "^([01]?[0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9]$"
-  pat <- paste0('^([^:]+(?::[^:]+){',n-1,'}).*')
-  
-  conn <- file(fileName,open="r")
-  linn <-readLines(conn)
-  for (i in 1:length(linn)){
-    line <- gsub('\t', " ", linn[i], fixed = TRUE)
+  pat <- paste0("^([^:]+(?::[^:]+){", n - 1, "}).*")
+
+  conn <- file(fileName, open = "r")
+  linn <- readLines(conn)
+  for (i in 1:length(linn)) {
+    line <- gsub("\t", " ", linn[i], fixed = TRUE)
     line2 <- strsplit(line, " ")[[1]]
-    startTime <- line2[4]
-    startTime <- sub(pat, '\\1', startTime)
-    startTime <- gsub("\\..*","",startTime)
-    
-    if (grepl(hms_regex, startTime)) {
-      print(startTime)
-      break
+    given_stage <- line2[1]
+    isSleepStage <- given_stage %in% sleep_stage
+
+    if (isSleepStage) {
+      startTime <- line2[4]
+      startTime <- sub(pat, "\\1", startTime)
+      startTime <- gsub("\\..*", "", startTime)
+
+      if (grepl(hms_regex, startTime)) {
+        print(startTime)
+        break
+      }
     }
   }
   close(conn)
   return(startTime)
 }
-
-
-
-
-
