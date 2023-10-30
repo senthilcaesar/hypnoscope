@@ -7,7 +7,7 @@ lhypno2 <- function(hypno, cycles = NULL, times = seq(0, by = 30, length.out = l
   # change points
   chgs <- which(ss[1:(length(ss) - 1)] != ss[2:length(ss)])
   for (chg in chgs) {
-    # do not plot connector if change spans a gap; gap define assuming 30-second eppchs
+    # do not plot connector if change spans a gap; gap define assuming 30-second epochs
     if (!(times[chg + 1] - times[chg] > 40)) {
       lines(rep(((times[chg] + times[chg + 1]) / 2) / 3600, 2), c(sn[chg], sn[chg + 1]), lwd = 2, col = "gray")
     }

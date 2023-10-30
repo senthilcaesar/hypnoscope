@@ -4,6 +4,7 @@ library(luna)
 library(shinybusy)
 library(shinyWidgets)
 library(shinyjs)
+library(dplyr)
 library(datamods)
 library(lubridate)
 library(shinydashboard)
@@ -443,11 +444,6 @@ server <- function(input, output, session) {
   observeEvent(values2$file.details, {
     values2$opt[["hypnonames"]] <- values2$file.details[["hypnos.names"]]
 
-    # Set Image properties
-    values2$opt["width"] <- 200 * 5
-    values2$opt["height"] <- 200 * 8
-    values2$opt["res"] <- 1400
-
     d <- read.table(values2$file.details[["hypnos.file"]], header = T, stringsAsFactors = F)
     names(d)[4] <- "SS"
 
@@ -543,7 +539,21 @@ server <- function(input, output, session) {
       CLOCK_TIME = clockTime(), # Call reactive expression
       ONSET = onset()
     )
+    
+    # Set Image properties
+    values2$opt["width"] <- 200 * 4
 
+    if(ncol(data) > 500) {values2$opt["height"] <- ncol(data) * 1}
+    if(between(ncol(data), 401, 500)) {values2$opt["height"] <- ncol(data) * 1.2}
+    if(between(ncol(data), 301, 400)) {values2$opt["height"] <- ncol(data) * 1.5}
+    if(between(ncol(data), 201, 300)) {values2$opt["height"] <- ncol(data) * 2}
+    if(between(ncol(data), 151, 200)) {values2$opt["height"] <- ncol(data) * 3}
+    if(between(ncol(data), 101, 150)) {values2$opt["height"] <- ncol(data) * 4}
+    if(between(ncol(data), 50, 100)) {values2$opt["height"] <- ncol(data) * 5}
+    if(between(ncol(data), 2, 50)) {values2$opt["height"] <- ncol(data) * 8}
+    
+    values2$opt["res"] <- 36
+    
     names_vector1 <- c("Time of Sleep Onset", "Start of recording")
     names_vector2 <- c("NULL")
     if (input$ultradian2 == "CLOCK_TIME") {
@@ -556,22 +566,23 @@ server <- function(input, output, session) {
       {
         # A temp file to save the output.
         # This file will be removed later by render Image
-        outfile <- tempfile(fileext = ".png")
+        outfile <- tempfile(fileext = ".jpeg")
 
         # Generate the PNG
-        png(outfile,
+        jpeg(outfile,
           width = as.numeric(values2$opt["width"]),
           height = as.numeric(values2$opt["height"]),
-          res = as.numeric(values2$opt["res"])
+          res = as.numeric(values2$opt["res"]),
+          quality = 100
         )
-        par(mar = c(1, 0.5, 0.2, 0))
+        par(mar = c(1, 8, 0.2, 0))
         image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
         dev.off()
 
         # Return a list containing the file name
         list(
           src = outfile,
-          contentType = "image/png",
+          contentType = "image/jpeg",
           width = as.numeric(values2$opt["width"]),
           height = as.numeric(values2$opt["height"]),
           alt = "This is alternate text"
@@ -591,7 +602,7 @@ server <- function(input, output, session) {
     )
     HTML(paste0(
       "Number of observations <br>",
-      nrow(data),
+      ncol(data),
       " <b>", input$ultradian2, "</b>"
     ))
   })
@@ -620,22 +631,23 @@ server <- function(input, output, session) {
     # Update plot
     output$myImage <- renderImage(
       {
-        outfile <- tempfile(fileext = ".png")
+        outfile <- tempfile(fileext = ".jpeg")
 
         # Generate the PNG
-        png(outfile,
+        jpeg(outfile,
           width = as.numeric(values2$opt["width"]),
           height = as.numeric(values2$opt["height"]),
-          res = as.numeric(values2$opt["res"])
+          res = as.numeric(values2$opt["res"]),
+          quality = 100
         )
-        par(mar = c(1, 0.5, 0.2, 0))
+        par(mar = c(1, 8, 0.2, 0))
         image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
         dev.off()
 
         # Return a list containing the file name
         list(
           src = outfile,
-          contentType = "image/png",
+          contentType = "image/jpeg",
           width = as.numeric(values2$opt["width"]),
           height = as.numeric(values2$opt["height"]),
           alt = "This is alternate text"

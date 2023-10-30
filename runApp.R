@@ -3,9 +3,11 @@ library(luna)
 library(shinybusy)
 library(shinyWidgets)
 library(shinyjs)
+library(dplyr)
 library(datamods)
 library(lubridate)
 library(shinydashboard)
+
 
 options(shiny.maxRequestSize = 2000 * 1024^2)
 source('/Users/sq566/hypnoscope/ui.R', local = TRUE)

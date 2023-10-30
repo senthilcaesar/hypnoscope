@@ -3,15 +3,16 @@ library(luna)
 library(shinybusy)
 library(shinyWidgets)
 library(shinyjs)
+library(dplyr)
 library(datamods)
 library(lubridate)
 library(shinydashboard)
 
 ui <- navbarPage(
   useShinyjs(),
+  #includeCSS("zoom.css"),
   id = "tabset",
   title = "Hypnoscope",
-
 
   # Component 1
   tabPanel(
@@ -88,11 +89,18 @@ ui <- navbarPage(
         10,
         tags$head(tags$style(
           type = "text/css",
-          "#myImage img {max-width: 100%; width: 1200; height: auto}"
+          "#myImage img {max-width: 100%; width: 600; height: 600;}"
         )),
         box(
-          style = "width:1200px;overflow-x: scroll;height:800px;overflow-y: scroll;",
+          style = "width:600px;overflow-x: scroll;height:600px;overflow-y: scroll;",
           imageOutput("myImage")
+
+          # tags$div(class = "container", checked = NA,
+          #          tags$input(type = "checkbox", id = "zoomCheck"),
+          #          tags$label(`for` = "zoomCheck"),
+          #          tags$img(src = "myImage"),
+          #          imageOutput("myImage")
+          # )
         )
       )
     )
