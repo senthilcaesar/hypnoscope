@@ -49,6 +49,7 @@ RUN install2.r --error --skipinstalled \
     shinyjs \
     datamods \
     lubridate \
+    dplyr \
     aws.s3
 
 COPY Rprofile.site /usr/local/lib/R/etc/
