@@ -109,14 +109,13 @@ server <- function(input, output, session) {
 
     # some brief console output
     cat(" has annotations?", values$hasannots, "\n")
-    
+
     # If in .annot format, Get start time from file
-    file_ext <- endsWith(annot.paths, '.annot')
+    file_ext <- endsWith(annot.paths, ".annot")
     if (isTRUE(file_ext)) {
       startTime <- extract_hms(annot.paths)
-      lempty.edf(start=startTime)
-    }
-    else {
+      lempty.edf(start = startTime)
+    } else {
       lempty.edf()
     }
 
@@ -539,21 +538,38 @@ server <- function(input, output, session) {
       CLOCK_TIME = clockTime(), # Call reactive expression
       ONSET = onset()
     )
-    
-    # Set Image properties
-    values2$opt["width"] <- 200 * 4
 
-    if(ncol(data) > 500) {values2$opt["height"] <- ncol(data) * 1}
-    if(between(ncol(data), 401, 500)) {values2$opt["height"] <- ncol(data) * 1.2}
-    if(between(ncol(data), 301, 400)) {values2$opt["height"] <- ncol(data) * 1.5}
-    if(between(ncol(data), 201, 300)) {values2$opt["height"] <- ncol(data) * 2}
-    if(between(ncol(data), 151, 200)) {values2$opt["height"] <- ncol(data) * 3}
-    if(between(ncol(data), 101, 150)) {values2$opt["height"] <- ncol(data) * 4}
-    if(between(ncol(data), 50, 100)) {values2$opt["height"] <- ncol(data) * 5}
-    if(between(ncol(data), 2, 50)) {values2$opt["height"] <- ncol(data) * 8}
-    
-    values2$opt["res"] <- 36
-    
+    # Set Image properties
+    values2$opt["width"] <- 1000
+    values2$opt["res"] <- 72
+
+    if (ncol(data) > 500) {
+      values2$opt["height"] <- ncol(data) * 1
+    }
+    if (between(ncol(data), 401, 500)) {
+      values2$opt["height"] <- ncol(data) * 1.2
+    }
+    if (between(ncol(data), 301, 400)) {
+      values2$opt["height"] <- ncol(data) * 1.5
+    }
+    if (between(ncol(data), 201, 300)) {
+      values2$opt["height"] <- ncol(data) * 2
+    }
+    if (between(ncol(data), 151, 200)) {
+      values2$opt["height"] <- ncol(data) * 3
+    }
+    if (between(ncol(data), 101, 150)) {
+      values2$opt["height"] <- ncol(data) * 4
+    }
+    if (between(ncol(data), 50, 100)) {
+      values2$opt["height"] <- ncol(data) * 5
+    }
+    if (between(ncol(data), 2, 50)) {
+      values2$opt["height"] <- ncol(data) * 6
+      values2$opt["width"] <- 800
+      values2$opt["res"] <- 36
+    }
+
     names_vector1 <- c("Time of Sleep Onset", "Start of recording")
     names_vector2 <- c("NULL")
     if (input$ultradian2 == "CLOCK_TIME") {
@@ -575,7 +591,7 @@ server <- function(input, output, session) {
           res = as.numeric(values2$opt["res"]),
           quality = 100
         )
-        par(mar = c(1, 8, 0.2, 0))
+        par(mar = c(1, 3, 0, 0))
         image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
         dev.off()
 
@@ -591,6 +607,7 @@ server <- function(input, output, session) {
       deleteFile = TRUE
     )
   })
+
 
   # server - Print number of observations plotted
   output$n <- renderUI({
@@ -640,7 +657,7 @@ server <- function(input, output, session) {
           res = as.numeric(values2$opt["res"]),
           quality = 100
         )
-        par(mar = c(1, 8, 0.2, 0))
+        par(mar = c(1, 3, 0, 0))
         image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
         dev.off()
 

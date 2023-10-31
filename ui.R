@@ -10,7 +10,7 @@ library(shinydashboard)
 
 ui <- navbarPage(
   useShinyjs(),
-  #includeCSS("zoom.css"),
+  includeCSS("zoom.css"),
   id = "tabset",
   title = "Hypnoscope",
 
@@ -87,20 +87,19 @@ ui <- navbarPage(
       ),
       column(
         10,
+        align = "center",
         tags$head(tags$style(
           type = "text/css",
-          "#myImage img {max-width: 100%; width: 600; height: 600;}"
+          "#myImage img {max-width: 100%; width: 1000; height: 1200;}"
         )),
         box(
-          style = "width:600px;overflow-x: scroll;height:600px;overflow-y: scroll;",
-          imageOutput("myImage")
-
-          # tags$div(class = "container", checked = NA,
-          #          tags$input(type = "checkbox", id = "zoomCheck"),
-          #          tags$label(`for` = "zoomCheck"),
-          #          tags$img(src = "myImage"),
-          #          imageOutput("myImage")
-          # )
+          style = "width:1000px;overflow-x: scroll;height:800px;overflow-y: scroll;",
+          tags$div(
+            class = "container", checked = NA,
+            tags$input(type = "checkbox", id = "zoomCheck"),
+            tags$label(`for` = "zoomCheck"),
+            imageOutput("myImage")
+          )
         )
       )
     )
