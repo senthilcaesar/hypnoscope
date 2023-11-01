@@ -540,6 +540,7 @@ server <- function(input, output, session) {
       ONSET = onset()
     )
 
+
     # Set Image properties
     values2$opt["width"] <- 1200
     values2$opt["res"] <- 72
@@ -593,12 +594,28 @@ server <- function(input, output, session) {
           quality = 100
         )
 
-        par(mar = c(1, 3, 1, 0))
+        # par(mar = c(1, 3, 1, 0))
+        plot.new()
+        plot.window(xlim = c(0, nrow(data)), ylim = c(0, ncol(data)))
+        # axis(side = 1, pos = 0, at = seq(from = 0, to = nrow(data), by = 1), col = "gray20",
+        #     lwd.ticks = 0.25, cex.axis = 1, col.axis = "gray20", lwd = 1)
+        # axis(side = 2, pos = 25, at = seq(from = 0, to = ncol(data), by = 1),
+        #     col = "gray20", las = 2, lwd.ticks = 0.5, cex.axis = 1,
+        #     col.axis = "gray20", lwd = 1.5)
+
         image(data,
           useRaster = T, col = values2$opt[["stgpal"]],
-          xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6),
-          xlab = "Clock-time", ylab = NA
+          xaxt = "n", yaxt = "n", axes = T, breaks = 0.5 + (0:6)
         )
+
+        title(
+          main = NA,
+          xlab = paste0(input$ultradian2),
+          ylab = "Individuals",
+          cex.lab = 1.5,
+          cex.main = 1.5
+        )
+
         dev.off()
 
         # Return a list containing the file name
@@ -639,14 +656,17 @@ server <- function(input, output, session) {
       ONSET = onset()
     )
 
+    plot_title <- NA
     if (!isTruthy(input$sort)) {
       data <- data
     } else if (input$sort == "Time of Sleep Onset" & input$ultradian2 == "CLOCK_TIME") {
       sort_by <- order(values2$opt[["tmp_data"]]$T2, decreasing = TRUE)
       data <- data[, sort_by] # Column sorted by time of sleep onset
+      plot_title <- "Row sorted by time of sleep onset"
     } else if (input$sort == "Start of recording" & input$ultradian2 == "CLOCK_TIME") {
       sort_by <- order(values2$opt[["start_recording"]], decreasing = TRUE)
       data <- data[, sort_by] # Column sorted by start of recording
+      plot_title <- "Row sorted by time at start of recording"
     } else {
       data <- data
     }
@@ -664,12 +684,28 @@ server <- function(input, output, session) {
           quality = 100
         )
 
-        par(mar = c(1, 3, 1, 0))
+        # par(mar = c(1, 3, 1, 0))
+        # plot.new()
+        plot.window(xlim = c(0, nrow(data)), ylim = c(0, ncol(data)))
+        # axis(side = 1, pos = 0, at = seq(from = 0, to = nrow(data), by = 1), col = "gray20",
+        #     lwd.ticks = 0.25, cex.axis = 1, col.axis = "gray20", lwd = 1)
+        # axis(side = 2, pos = 25, at = seq(from = 0, to = ncol(data), by = 1),
+        #     col = "gray20", las = 2, lwd.ticks = 0.5, cex.axis = 1,
+        #     col.axis = "gray20", lwd = 1.5)
+
         image(data,
           useRaster = T, col = values2$opt[["stgpal"]],
-          xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6),
-          xlab = "Clock-time", ylab = NA
+          xaxt = "n", yaxt = "n", axes = T, breaks = 0.5 + (0:6)
         )
+
+        title(
+          main = plot_title,
+          xlab = paste0(input$ultradian2),
+          ylab = "Individuals",
+          cex.lab = 1.5,
+          cex.main = 1.5
+        )
+
         dev.off()
 
         # Return a list containing the file name
