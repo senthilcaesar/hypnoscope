@@ -88,12 +88,8 @@ ui <- navbarPage(
       column(
         10,
         align = "center",
-        tags$head(tags$style(
-          type = "text/css",
-          "#myImage img {max-width: 100%; width: 1000; height: 1200;}"
-        )),
         box(
-          style = "width:1000px;overflow-x: scroll;height:800px;overflow-y: scroll;",
+          style = "width:1200px; height:800px; overflow-y: scroll;",
           tags$div(
             class = "container", checked = NA,
             tags$input(type = "checkbox", id = "zoomCheck"),

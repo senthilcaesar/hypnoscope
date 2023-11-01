@@ -492,7 +492,7 @@ server <- function(input, output, session) {
     values2$opt[["tmp_data"]] <- d1
     values2$opt[["data"]] <- d
     values2$opt[["ni"]] <- ni
-    values2$opt[["stgpal"]] <- c(lstgcols("N3"), lstgcols("N2"), lstgcols("N1"), lstgcols("R"), lstgcols("W"), lstgcols("?"))
+    values2$opt[["stgpal"]] <- c("#3D6D88", "#579DAF", "#0B2F38", "#CA7647", "#EBE3DD", lstgcols("?"))
   }) # End of observe Event (input$upload)
 
   # Create reactive expressions with reactive({ })
@@ -520,6 +520,7 @@ server <- function(input, output, session) {
     ne <- max(values2$opt[["data"]]$EA) - min(values2$opt[["data"]]$EA) + 1
     m <- matrix(NA, nrow = ne, ncol = values2$opt[["ni"]])
     for (i in 1:values2$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values2$opt[["data"]]$SS[values2$opt[["data"]]$ID == ids[i]])
+    saveRDS(m, file = "my_data.rds")
     m
   })
 
@@ -540,7 +541,7 @@ server <- function(input, output, session) {
     )
 
     # Set Image properties
-    values2$opt["width"] <- 1000
+    values2$opt["width"] <- 1200
     values2$opt["res"] <- 72
 
     if (ncol(data) > 500) {
@@ -591,8 +592,13 @@ server <- function(input, output, session) {
           res = as.numeric(values2$opt["res"]),
           quality = 100
         )
-        par(mar = c(1, 3, 0, 0))
-        image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+
+        par(mar = c(1, 3, 1, 0))
+        image(data,
+          useRaster = T, col = values2$opt[["stgpal"]],
+          xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6),
+          xlab = "Clock-time", ylab = NA
+        )
         dev.off()
 
         # Return a list containing the file name
@@ -657,8 +663,13 @@ server <- function(input, output, session) {
           res = as.numeric(values2$opt["res"]),
           quality = 100
         )
-        par(mar = c(1, 3, 0, 0))
-        image(data, useRaster = T, col = values2$opt[["stgpal"]], xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6))
+
+        par(mar = c(1, 3, 1, 0))
+        image(data,
+          useRaster = T, col = values2$opt[["stgpal"]],
+          xaxt = "n", yaxt = "n", axes = F, breaks = 0.5 + (0:6),
+          xlab = "Clock-time", ylab = NA
+        )
         dev.off()
 
         # Return a list containing the file name

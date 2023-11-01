@@ -3,6 +3,7 @@ lhypno2 <- function(hypno, cycles = NULL, times = seq(0, by = 30, length.out = l
   ss[is.na(ss)] <- "?"
   e <- times / 3600
   sn <- lstgn(ss)
+  
   plot(e, sn, type = "n", lwd = 2, col = "gray", axes = F, ylim = c(-3, 3.5), ylab = "", yaxt = "n", xaxs = "i", xlim = c(start, stop) / 3600, xlab = "Time (hrs)")
   # change points
   chgs <- which(ss[1:(length(ss) - 1)] != ss[2:length(ss)])
