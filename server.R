@@ -597,7 +597,6 @@ server <- function(input, output, session) {
           quality = 100
         )
 
-        # par(mar = c(1, 3, 1, 0))
         plot.new()
         plot.window(xlim = c(0, nrow(data)), ylim = c(0, ncol(data)))
         # axis(side = 1, pos = 0, at = seq(from = 0, to = nrow(data), by = 1), col = "gray20",
@@ -687,8 +686,7 @@ server <- function(input, output, session) {
           quality = 100
         )
 
-        # par(mar = c(1, 3, 1, 0))
-        # plot.new()
+        plot.new()
         plot.window(xlim = c(0, nrow(data)), ylim = c(0, ncol(data)))
         # axis(side = 1, pos = 0, at = seq(from = 0, to = nrow(data), by = 1), col = "gray20",
         #     lwd.ticks = 0.25, cex.axis = 1, col.axis = "gray20", lwd = 1)
