@@ -520,7 +520,6 @@ server <- function(input, output, session) {
     ne <- max(values2$opt[["data"]]$EA) - min(values2$opt[["data"]]$EA) + 1
     m <- matrix(NA, nrow = ne, ncol = values2$opt[["ni"]])
     for (i in 1:values2$opt[["ni"]]) m[(dmin[i]):(dmax[i]), i] <- 4 + lstgn(values2$opt[["data"]]$SS[values2$opt[["data"]]$ID == ids[i]])
-    saveRDS(m, file = "my_data.rds")
     m
   })
 
@@ -539,7 +538,6 @@ server <- function(input, output, session) {
       CLOCK_TIME = clockTime(), # Call reactive expression
       ONSET = onset()
     )
-
 
     # Set Image properties
     values2$opt["width"] <- 1200
@@ -563,13 +561,18 @@ server <- function(input, output, session) {
     if (between(ncol(data), 101, 150)) {
       values2$opt["height"] <- ncol(data) * 4
     }
-    if (between(ncol(data), 50, 100)) {
+    if (between(ncol(data), 51, 100)) {
       values2$opt["height"] <- ncol(data) * 5
     }
-    if (between(ncol(data), 2, 50)) {
-      values2$opt["height"] <- ncol(data) * 6
+    if (between(ncol(data), 21, 50)) {
+      values2$opt["height"] <- ncol(data) * 12
+      values2$opt["width"] <- 1000
+      values2$opt["res"] <- 60
+    }
+    if (between(ncol(data), 2, 20)) {
+      values2$opt["height"] <- ncol(data) * 14
       values2$opt["width"] <- 800
-      values2$opt["res"] <- 36
+      values2$opt["res"] <- 24
     }
 
     names_vector1 <- c("Time of Sleep Onset", "Start of recording")
