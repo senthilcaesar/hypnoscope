@@ -163,7 +163,7 @@ server <- function(input, output, session) {
     values$opt[["init.epochs.aligned"]] <- ret$EPOCH$E
     ret <- leval("HYPNO epoch")
 
-    stgs <- lstages()
+    stgs <- leval("STAGE force")$STAGE$E$STAGE
     values$hasstaging <- !is.null(stgs)
     values$variable.staging <- F
     if (values$hasstaging) {
