@@ -10,7 +10,7 @@ library(shinydashboard)
 
 ui <- navbarPage(
   useShinyjs(),
-  includeCSS("zoom.css"),
+  includeCSS("./zoom.css"),
   id = "tabset",
   title = "Hypnoscope",
 
@@ -99,5 +99,55 @@ ui <- navbarPage(
         )
       )
     )
+  ),
+
+  # Component 3
+  tabPanel(
+    title = "Help",
+    tags$head(
+      tags$style(HTML("
+            code {
+                display:block;
+                padding:9.5px;
+                margin:0 0 10px;
+                margin-top:10px;
+                font-size:13px;
+                line-height:20px;
+                word-break:break-all;
+                word-wrap:break-word;
+                white-space:pre-wrap;
+                background-color:#F5F5F5;
+                border:1px solid rgba(0,0,0,0.15);
+                border-radius:4px;
+                font-family:monospace;
+            }"))
+    ),
+    p("1) For viewing a single hypnogram, Please upload a file in any of the following formats."),
+    strong(" .annot"),
+    br(),
+    strong(" .eannot"),
+    br(),
+    strong(" .xml"),
+    br(),
+    br(),
+    p(
+      "In copy & paste box, you can paste the staging annotations",
+      span("(W,N1,N2,N3,R)", style = "color:blue"),
+      ". The format is one row per epoch, i.e each row contains a single label, that is attached to that epoch."
+    ),
+    em("By default, Luna assumes epochs are 30-seconds in duration."),
+    # div(" In copy & paste box, you can paste staging annotations (W,N1,N2,N3,R).
+    #  The format is one row per epoch, i.e each row contains a single label.", style = "color:blue"),
+    # p(".eannot", style = "font-family: 'times'; font-si16pt"),
+    # p(".xml", style = "font-family: 'times'; font-si16pt"),
+    hr(),
+    p("2) For viewing mutiple hypnograms, Please upload a file in the following format."),
+    strong(" .hypnos"),
+    br(),
+    br(),
+    p("To create this format, Please use the following Luna command."),
+    code("luna s.lst -o out.db -s HYPNO epoch verbose=F"),
+    code("destrat out.db +HYPNO -r E -v OSTAGE CLOCK_TIME > mutiple.hypnos"),
+    br(),
   )
 )
