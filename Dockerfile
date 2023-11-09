@@ -95,7 +95,7 @@ RUN apt-get update && apt-get install -y \
 
 RUN mkdir /data
 RUN mkdir /root/hypnoscope
-COPY ui.R server.R helpers.R /root/hypnoscope/
+COPY ui.R server.R helpers.R zoom.css /root/hypnoscope/
 COPY data /root/hypnoscope/data
 
 ENV _R_SHLIB_STRIP_=true
