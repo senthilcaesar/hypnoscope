@@ -523,20 +523,83 @@ server <- function(input, output, session) {
     m
   })
 
+  stgpalW <- reactive({
+    stcol <- c("#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#CA7647", lstgcols("?"))
+    stcol
+  })
+
+  stgpalN1 <- reactive({
+    stcol <- c("#CA7647", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", lstgcols("?"))
+    stcol
+  })
+
+  stgpalN2 <- reactive({
+    stcol <- c("#EBE3DD", "#CA7647", "#EBE3DD", "#EBE3DD", "#EBE3DD", lstgcols("?"))
+    stcol
+  })
+
+  stgpalN3 <- reactive({
+    stcol <- c("#EBE3DD", "#EBE3DD", "#CA7647", "#EBE3DD", "#EBE3DD", lstgcols("?"))
+    stcol
+  })
+
+  stgpalR <- reactive({
+    stcol <- c("#EBE3DD", "#EBE3DD", "#EBE3DD", "#CA7647", "#EBE3DD", lstgcols("?"))
+    stcol
+  })
+
+  default <- reactive({
+    stcol <- c("#3D6D88", "#579DAF", "#0B2F38", "#CA7647", "#EBE3DD", lstgcols("?"))
+    stcol
+  })
+
   output$text.header2a <- renderText({
     req(values2$file.details)
     values2$opt[["hypnonames"]]
   })
 
-
+  observeEvent(c(input$ultradian2), {
+    if (input$ultradian2 == "ONSET") {
+      updateSelectizeInput(session, inputId = "sort", choices = c("Default"))
+    }
+    if (input$ultradian2 == "CLOCK_TIME") {
+      updateSelectizeInput(session, inputId = "sort", choices = c("Default", "Time of Sleep Onset", "Start of recording"))
+    }
+  })
 
   # Observe Inputs and plot
-  observeEvent(c(values2$file.details, input$ultradian2), {
+  observeEvent(c(values2$file.details, input$ultradian2, input$color, input$sort), {
     req(values2$file.details)
 
     data <- switch(input$ultradian2,
       CLOCK_TIME = clockTime(), # Call reactive expression
       ONSET = onset()
+    )
+
+    data <- switch(input$sort,
+      "Time of Sleep Onset" = {
+        plot_title <- "Row sorted by time of sleep onset"
+        sort_by <- order(values2$opt[["tmp_data"]]$T2, decreasing = TRUE)
+        data <- data[, sort_by] # Column sorted by time of sleep onset
+      },
+      "Start of recording" = {
+        plot_title <- "Row sorted by time at start of recording"
+        sort_by <- order(values2$opt[["start_recording"]], decreasing = TRUE)
+        data <- data[, sort_by] # Column sorted by start of recording
+      },
+      "Default" = {
+        plot_title <- NA
+        data
+      }
+    )
+
+    stcol <- switch(input$color,
+      W = stgpalW(),
+      N1 = stgpalN1(),
+      N2 = stgpalN2(),
+      N3 = stgpalN3(),
+      R = stgpalR(),
+      Default = default()
     )
 
     # Set Image properties
@@ -575,21 +638,11 @@ server <- function(input, output, session) {
       values2$opt["res"] <- 24
     }
 
-    names_vector1 <- c("Time of Sleep Onset", "Start of recording")
-    names_vector2 <- c("NULL")
-    if (input$ultradian2 == "CLOCK_TIME") {
-      updateSelectizeInput(session, inputId = "sort", choices = c("Choose" = "", names_vector1))
-    } else if (input$ultradian2 == "ONSET") {
-      updateSelectizeInput(session, inputId = "sort", choices = c("Choose" = "", names_vector2))
-    }
-
     output$myImage <- renderImage(
       {
-        # A temp file to save the output.
-        # This file will be removed later by render Image
+        # Generate the PNG
         outfile <- tempfile(fileext = ".jpeg")
 
-        # Generate the PNG
         jpeg(outfile,
           width = as.numeric(values2$opt["width"]),
           height = as.numeric(values2$opt["height"]),
@@ -606,96 +659,7 @@ server <- function(input, output, session) {
         #     col.axis = "gray20", lwd = 1.5)
 
         image(data,
-          useRaster = T, col = values2$opt[["stgpal"]],
-          xaxt = "n", yaxt = "n", axes = T, breaks = 0.5 + (0:6)
-        )
-
-        title(
-          main = NA,
-          xlab = paste0(input$ultradian2),
-          ylab = "Individuals",
-          cex.lab = 1.5,
-          cex.main = 1.5
-        )
-
-        dev.off()
-
-        # Return a list containing the file name
-        list(
-          src = outfile,
-          contentType = "image/jpeg",
-          width = as.numeric(values2$opt["width"]),
-          height = as.numeric(values2$opt["height"]),
-          alt = "This is alternate text"
-        )
-      },
-      deleteFile = TRUE
-    )
-  })
-
-
-  # server - Print number of observations plotted
-  output$n <- renderUI({
-    req(values2$file.details)
-
-    data <- switch(input$ultradian2,
-      CLOCK_TIME = clockTime(), # Call reactive expression
-      ONSET = onset()
-    )
-    HTML(paste0(
-      "Number of observations <br>",
-      ncol(data),
-      " <b>", input$ultradian2, "</b>"
-    ))
-  })
-
-
-  observeEvent(c(input$sort), {
-    req(values2$file.details)
-
-    data <- switch(input$ultradian2,
-      CLOCK_TIME = clockTime(), # Call reactive expression
-      ONSET = onset()
-    )
-
-    plot_title <- NA
-    if (!isTruthy(input$sort)) {
-      data <- data
-    } else if (input$sort == "Time of Sleep Onset" & input$ultradian2 == "CLOCK_TIME") {
-      sort_by <- order(values2$opt[["tmp_data"]]$T2, decreasing = TRUE)
-      data <- data[, sort_by] # Column sorted by time of sleep onset
-      plot_title <- "Row sorted by time of sleep onset"
-    } else if (input$sort == "Start of recording" & input$ultradian2 == "CLOCK_TIME") {
-      sort_by <- order(values2$opt[["start_recording"]], decreasing = TRUE)
-      data <- data[, sort_by] # Column sorted by start of recording
-      plot_title <- "Row sorted by time at start of recording"
-    } else {
-      data <- data
-    }
-
-    # Update plot
-    output$myImage <- renderImage(
-      {
-        outfile <- tempfile(fileext = ".jpeg")
-
-        # Generate the PNG
-        jpeg(outfile,
-          width = as.numeric(values2$opt["width"]),
-          height = as.numeric(values2$opt["height"]),
-          res = as.numeric(values2$opt["res"]),
-          quality = 100
-        )
-
-        plot.new()
-        plot.window(xlim = c(0, nrow(data)), ylim = c(0, ncol(data)))
-        # axis(side = 1, pos = 0, at = seq(from = 0, to = nrow(data), by = 1), col = "gray20",
-        #     lwd.ticks = 0.25, cex.axis = 1, col.axis = "gray20", lwd = 1)
-        # axis(side = 2, pos = 25, at = seq(from = 0, to = ncol(data), by = 1),
-        #     col = "gray20", las = 2, lwd.ticks = 0.5, cex.axis = 1,
-        #     col.axis = "gray20", lwd = 1.5)
-
-        image(data,
-          useRaster = T, col = values2$opt[["stgpal"]],
+          useRaster = T, col = stcol,
           xaxt = "n", yaxt = "n", axes = T, breaks = 0.5 + (0:6)
         )
 
@@ -706,10 +670,9 @@ server <- function(input, output, session) {
           cex.lab = 1.5,
           cex.main = 1.5
         )
-
         dev.off()
 
-        # Return a list containing the file name
+        # Return a list containing information about the image
         list(
           src = outfile,
           contentType = "image/jpeg",
@@ -720,5 +683,18 @@ server <- function(input, output, session) {
       },
       deleteFile = TRUE
     )
+  })
+
+  # server - Print number of observations plotted
+  output$n <- renderUI({
+    req(values2$file.details)
+
+    data <- switch(input$ultradian2,
+      CLOCK_TIME = clockTime(), # Call reactive expression
+      ONSET = onset()
+    )
+    HTML(paste0(
+      "Number of observations: ", " <b>", ncol(data), "</b>"
+    ))
   })
 }

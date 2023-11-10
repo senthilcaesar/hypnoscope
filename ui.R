@@ -10,7 +10,6 @@ library(shinydashboard)
 
 ui <- navbarPage(
   useShinyjs(),
-  includeCSS("./zoom.css"),
   id = "tabset",
   title = "Hypnoscope",
 
@@ -57,10 +56,7 @@ ui <- navbarPage(
     )
   ),
 
-
   # Component 2
-
-
   tabPanel(
     title = "N > 1",
     fluidRow(
@@ -82,7 +78,9 @@ ui <- navbarPage(
         actionButton("load.default2", "Example"),
         hr(style = "border-color: #d9d9d9"),
         selectInput(inputId = "ultradian2", label = "Align by", choices = c("CLOCK_TIME", "ONSET"), selected = "CLOCK_TIME", multiple = F),
-        selectInput("sort", label = h5("Sort by"), choices = c("Choose" = "", c("NULL")), multiple = F, selectize = T),
+        selectInput(inputId = "sort", label = "Sort by", choices = c("Default"), selected = "Default", multiple = F),
+        selectInput(inputId = "color", label = "Color scheme", choices = c("Default", "W", "N1", "N2", "N3", "R"), selected = "Default", multiple = F),
+        hr(style = "border-color: #d9d9d9"),
         uiOutput(outputId = "n")
       ),
       column(
@@ -90,12 +88,7 @@ ui <- navbarPage(
         align = "center",
         box(
           style = "width:1200px; height:800px; overflow-y: scroll;",
-          tags$div(
-            class = "container", checked = NA,
-            tags$input(type = "checkbox", id = "zoomCheck"),
-            tags$label(`for` = "zoomCheck"),
-            imageOutput("myImage")
-          )
+          imageOutput("myImage")
         )
       )
     )
