@@ -458,12 +458,14 @@ server <- function(input, output, session) {
 
     # Convert HMS to seconds
     secs <- lubridate::period_to_seconds(lubridate::hms(d1$CLOCK_TIME))
+    secs1 <- lubridate::period_to_seconds(lubridate::hms(c("20:00:00", "00:00:00", "06:00:00")))
 
     # Align to 30 sec epoch
     secs <- 30 * floor(secs / 30)
 
     # Need clarification ( secs less than 12 hrs )
     secs[secs < 43200] <- secs[secs < 43200] + 86400
+    secs1[secs1 < 43200] <- secs1[secs1 < 43200] + 86400
 
     # Get earliest time point
     td <- seconds_to_period(min(secs))
@@ -471,7 +473,10 @@ server <- function(input, output, session) {
 
     # Get epoch-wise starts for all people
     d1$E1 <- (secs - min(secs)) / 30
+    secs1 <- (secs1 - min(secs)) / 30
+
     values2$opt[["start_recording"]] <- d1$E1
+    values2$opt[["secs1"]] <- secs1
 
     # Adjust epoch counts : EA = aligned epochs (by clock)
     d <- merge(d, d1[, c("ID", "E1")], by = "ID")
@@ -554,7 +559,7 @@ server <- function(input, output, session) {
   })
 
   stgpalU <- reactive({
-    stcol <- c("#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#FF0000" ) # lstgcols("?") )
+    stcol <- c("#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#EBE3DD", "#FF0000") # lstgcols("?") )
     stcol
   })
 
@@ -622,7 +627,7 @@ server <- function(input, output, session) {
       values2$opt["height"] <- ncol(data) * 1
     }
     if (between(ncol(data), 401, 500)) {
-      values2$opt["height"] <- ncol(data) * 1.2
+      values2$opt["height"] <- ncol(data) * 2
     }
     if (between(ncol(data), 301, 400)) {
       values2$opt["height"] <- ncol(data) * 1.5
@@ -664,31 +669,39 @@ server <- function(input, output, session) {
 
         plot.new()
         plot.window(xlim = c(0, nrow(data)), ylim = c(0, ncol(data)))
-        # axis(side = 1, pos = 0, at = seq(from = 0, to = nrow(data), by = 1), col = "gray20",
-        #     lwd.ticks = 0.25, cex.axis = 1, col.axis = "gray20", lwd = 1)
-        # axis(side = 2, pos = 25, at = seq(from = 0, to = ncol(data), by = 1),
-        #     col = "gray20", las = 2, lwd.ticks = 0.5, cex.axis = 1,
-        #     col.axis = "gray20", lwd = 1.5)
 
         ustg <- as.integer(unique(names(table(data))))
         print(stcol)
-	    print(ustg)
-	    brks <- c( ustg[1] - 0.5 , ustg + 0.5 )
-	    print(brks)
- 	    print(stcol[ustg])
+        print(ustg)
+        brks <- c(ustg[1] - 0.5, ustg + 0.5)
+        print(brks)
+        print(stcol[ustg])
 
         image(data,
           useRaster = T, col = stcol[ustg],
           xaxt = "n", yaxt = "n", axes = T, breaks = brks
         )
 
-        title(
-          main = plot_title,
-          xlab = paste0(input$ultradian2),
-          ylab = "Individuals",
-          cex.lab = 1.5,
-          cex.main = 1.5
-        )
+        if (input$ultradian2 == "CLOCK_TIME") {
+          v1 <- values2$opt[["secs1"]][1] / dim(data)[1]
+          v2 <- values2$opt[["secs1"]][2] / dim(data)[1]
+          v3 <- values2$opt[["secs1"]][3] / dim(data)[1]
+
+          abline(v = v1, col = "red", lwd = 1)
+          abline(v = v2, col = "red", lwd = 1)
+          abline(v = v3, col = "red", lwd = 1)
+
+          mtext("8pm", side = 1, line = 1, at = v1, cex = 1.5)
+          mtext("Midnight", side = 1, line = 1, at = v2, cex = 1.5)
+          mtext("6am", side = 1, line = 1, at = v3, cex = 1.5)
+        }
+        # title(
+        #  main = plot_title,
+        #  xlab = paste0(input$ultradian2),
+        #  ylab = "Individuals",
+        #  cex.lab = 1.5,
+        #  cex.main = 1.5
+        # )
         dev.off()
 
         # Return a list containing information about the image
